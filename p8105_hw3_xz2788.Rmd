@@ -9,3 +9,42 @@ output: github_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+# Problem 1
+
+Load dataset and package
+
+```{r load_dataset_package}
+library(p8105.datasets)
+library(tidyverse)
+```
+
+Look at the data first
+
+```{r overview_data, eval=FALSE}
+str(brfss_smart2010)
+head(brfss_smart2010)
+tail(brfss_smart2010)
+View(brfss_smart2010)
+```
+
+Tidy the data
+
+```{r tidy_data}
+brfss_smart2010_tidy = janitor::clean_names(brfss_smart2010) %>%
+  filter(topic == "Overall Health") %>% 
+  rename(state = locationabbr, county = locationdesc) %>% 
+  filter(response == "Excellent" | response == "Very good" |  response == "Good" | response == "Fair" | response == "Poor")
+```
+
+Convert the "response" variable into a factor
+
+```{r convert_to_factor}
+brfss_smart2010_tidy$response = factor(brfss_smart2010_tidy$response, 
+                      levels = c("Excellent", "Very good", "Good", "Fair", "Poor"))
+```
+
+## which states were observed at 7 locations
+
+
+
+
