@@ -33,7 +33,7 @@ Tidy the data
 brfss_smart2010_tidy = janitor::clean_names(brfss_smart2010) %>%
   filter(topic == "Overall Health") %>% 
   rename(state = locationabbr, county = locationdesc) %>% 
-  filter(response == "Excellent" | response == "Very good" |  response == "Good" | response == "Fair" | response == "Poor")
+  filter(response %in% c("Excellent", "Very good", "Good", "Fair", "Poor"))
 ```
 
 Convert the "response" variable into a factor
@@ -45,6 +45,53 @@ brfss_smart2010_tidy$response = factor(brfss_smart2010_tidy$response,
 
 ## which states were observed at 7 locations
 
+```{r state_at_seven_locations}
+brfss_smart2010_tidy %>% 
+  group_by(state) %>% 
+  summarize(n_location = n_distinct(geo_location)) %>% 
+  filter(n_location == 7)
+```
 
+There are seven states were observed at 7 locations. These are:
+"Connecticut (CT)", "Montana (MT)", "New Hampshire (NH)", "New Mexico (NM)", "Oregon (OR)", "Tennessee (TN)", "Utah (UT)"
 
+## "Spaghetti plot"
+
+```{r spaghetti_plot}
+brfss_smart2010_tidy %>% 
+  group_by(state, year) %>% 
+  summarize(n_obs = sum(sample_size)) %>% 
+  ggplot(aes(x = year, y = n_obs)) + 
+  geom_line(aes(color = state)) +
+  labs(
+    title = "Observation plot",
+    x = "Year",
+    y = "Number of observations"
+  )
+```
+
+## Making a table
+
+```{r}
+filter(brfss_smart2010_tidy, 
+       state == "NY",
+       year %in% c(2002, 2006, 2010),
+       response == "Excellent") %>%
+  group_by(year) %>% 
+  summarize(sd_prop = sd(data_value),
+            mean_prop = mean(data_value)) %>% 
+  knitr::kable(digits = 2)
+```
+
+## Five-panel plot
+
+```{r}
+brfss_smart2010_tidy %>% 
+  group_by(state, year, response) %>% 
+  summarize(average_prop = mean(data_value)) %>% 
+  ggplot(aes(x = year, y = average_prop)) +
+  geom_line(aes(color = state)) +
+  facet_grid(. ~ response) +
+   theme(legend.position = "bottom")
+```
 
