@@ -72,7 +72,7 @@ brfss_smart2010_tidy %>%
 
 ## Making a table
 
-```{r}
+```{r make_table}
 filter(brfss_smart2010_tidy, 
        state == "NY",
        year %in% c(2002, 2006, 2010),
@@ -85,7 +85,7 @@ filter(brfss_smart2010_tidy,
 
 ## Five-panel plot
 
-```{r}
+```{r make_five_panel_plot}
 brfss_smart2010_tidy %>% 
   group_by(state, year, response) %>% 
   summarize(average_prop = mean(data_value)) %>% 
@@ -93,5 +93,28 @@ brfss_smart2010_tidy %>%
   geom_line(aes(color = state)) +
   facet_grid(. ~ response) +
    theme(legend.position = "bottom")
+```
+
+# Problem 2
+
+View the data first
+
+```{r p2_data, eval=FALSE}
+View(instacart)
+head(instacart)
+tail(instacart)
+str(instacart)
+dim(instacart)
+skimr::skim(instacart)
+```
+
+There are 1,384,617 observations and 15 variables in this dataset. Each row represents a product from an online order and contains information about the time of the order, product of the order, the previous ordering history from this same customer. Only the evaluation set that the order belongs to, product name, aisle identifier and name of department are character variables. Others are integers. There are no missing values in the dataset.
+
+For example, in the first row, it shows the product "Bulgarian Yogurt" ordered by the user with ID "112108" and it was ordered from the cart at 10:00 am on Thursday. This customer also bought this same product 9 days ago.
+
+## How many aisles and which are the most items ordered from?
+
+```{r}
+
 ```
 
