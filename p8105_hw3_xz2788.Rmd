@@ -134,6 +134,8 @@ instacart %>%
   geom_point()
 ```
 
+Comment:
+
 ## Table showing the most popular item in three specific aisles
 
 ```{r table_of_pop_item}
@@ -156,8 +158,21 @@ The most popular item in "packaged vegetables fruits" is "Organic Baby Spinach" 
 instacart %>% 
   filter(product_name %in% c("Pink Lady Apples", "Coffee Ice Cream")) %>% 
   group_by(product_name, order_dow) %>% 
-  summarize(mean_hour = mean(order_hour_of_day)) %>% 
+  summarize(mean_hour = round(mean(order_hour_of_day))) %>% 
   spread(key = order_dow, value = mean_hour)
 ```
 
+People usually buy coffee ice cream in the afternoon of the day, just after lunch, but for Friday, the time is a little bit earlier. The ordering time of pink lady apples are earlier than that of coffee ice cream, almost at noon. The ordering time among days of the week does not vary a lot.
 
+# Problem 3
+
+View the data first
+
+```{r p3_data, eval=FALSE}
+head(ny_noaa)
+tail(ny_noaa)
+str(ny_noaa)
+skimr::skim(ny_noaa)
+```
+
+There are 2,595,176 observations and 7 variables. It mainly contains the information of the date, maximum and minimum temperature (tenths of degrees C), total precipitation (tenths of mm) of the day, snow fall (mm) and snow depth (mm). "date" is a Date variable, station ID, maximum temperature, minimum temperature are character variables and all of the others are integers. Except ID and date, all the variables have missing values. Because it didn't rain or snow for some days in some stations and also some stations only collect part of the variables. Missing value can be an issue when one station does not collect the data of some variables, R will consider it as zero which means no rain or snow. In this kind of situation, NA can effect the result.
