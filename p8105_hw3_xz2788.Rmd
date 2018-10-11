@@ -16,6 +16,8 @@ Load dataset and package
 ```{r load_dataset_package}
 library(p8105.datasets)
 library(tidyverse)
+library(patchwork)
+data("brfss_smart2010")
 ```
 
 Look at the data first
@@ -43,17 +45,18 @@ brfss_smart2010_tidy$response = factor(brfss_smart2010_tidy$response,
                       levels = c("Excellent", "Very good", "Good", "Fair", "Poor"))
 ```
 
-## which states were observed at 7 locations
+## which states were observed at 7 locations in 2002
 
 ```{r state_at_seven_locations}
 brfss_smart2010_tidy %>% 
+  filter(year == 2002) %>% 
   group_by(state) %>% 
   summarize(n_location = n_distinct(geo_location)) %>% 
   filter(n_location == 7)
 ```
 
-There are seven states were observed at 7 locations. These are:
-"Connecticut (CT)", "Montana (MT)", "New Hampshire (NH)", "New Mexico (NM)", "Oregon (OR)", "Tennessee (TN)", "Utah (UT)"
+There are three states were observed at 7 locations. These are:
+"Connecticut (CT)", "Florida (FL)", "North Carolina (NC)"
 
 ## "Spaghetti plot"
 
@@ -96,6 +99,12 @@ brfss_smart2010_tidy %>%
 ```
 
 # Problem 2
+
+Load the data
+
+```{r}
+data("instacart")
+```
 
 View the data first
 
@@ -159,12 +168,19 @@ instacart %>%
   filter(product_name %in% c("Pink Lady Apples", "Coffee Ice Cream")) %>% 
   group_by(product_name, order_dow) %>% 
   summarize(mean_hour = round(mean(order_hour_of_day))) %>% 
-  spread(key = order_dow, value = mean_hour)
+  spread(key = order_dow, value = mean_hour) %>% 
+  knitr::kable()
 ```
 
 People usually buy coffee ice cream in the afternoon of the day, just after lunch, but for Friday, the time is a little bit earlier. The ordering time of pink lady apples are earlier than that of coffee ice cream, almost at noon. The ordering time among days of the week does not vary a lot.
 
 # Problem 3
+
+Load the data
+
+```{r}
+data("ny_noaa")
+```
 
 View the data first
 
@@ -205,8 +221,10 @@ Thus, for snowfall, the most commonly observed value is 0. Because I firstly fil
 ```{r plot_of_average_temp}
 ny_noaa_tidy %>% 
   filter(month %in% c("01", "07")) %>% 
-  ggplot(aes(x = year, y = (tmax + tmin)/2)) +
-  geom_line(aes(color = id)) +
-  facet_grid(. ~ month)
+  ggplot(aes(y = year, x = (tmax + tmin)/2)) +
+  geom_point(aes(color = id)) +
+  facet_grid(~month) +
+  theme_bw() +
+  theme(legend.position = "none") 
 ```
 
