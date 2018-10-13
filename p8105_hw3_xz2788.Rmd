@@ -63,15 +63,21 @@ There are three states were observed at 7 locations. These are:
 ```{r spaghetti_plot}
 brfss_smart2010_tidy %>% 
   group_by(state, year) %>% 
-  summarize(n_obs = sum(sample_size)) %>% 
-  ggplot(aes(x = year, y = n_obs)) + 
+  summarize(n_locat = sum(n_distinct(geo_location, na.rm = TRUE))) %>% 
+  ggplot(aes(x = year, y = n_locat)) + 
   geom_line(aes(color = state)) +
+  theme_bw() +
   labs(
-    title = "Observation plot",
+    title = "Number of locations in each state 2002-2010",
     x = "Year",
-    y = "Number of observations"
-  )
+    y = "Number of locations",
+    caption = "Data from the brfss dataset"
+  ) +
+  theme(legend.position = "bottom") +
+  guides(col = guide_legend(nrow = 3))
 ```
+
+FL state has the highest number of locations in the year of 2007, but some of these stations did not conduct the study every year. Most of the state only have less than 10 locations.
 
 ## Making a table
 
@@ -86,17 +92,29 @@ filter(brfss_smart2010_tidy,
   knitr::kable(digits = 2)
 ```
 
+From 2002 to 2010, the mean proportion of "Excellence" response decreased from 24% to 22.7% in New York City, and the standard deviations were also decreasing which showed that different proportions of "Excellence" in different locations in NY was smaller.
+
 ## Five-panel plot
 
 ```{r make_five_panel_plot}
 brfss_smart2010_tidy %>% 
   group_by(state, year, response) %>% 
-  summarize(average_prop = mean(data_value)) %>% 
+  summarize(average_prop = mean(data_value, na.rm = TRUE)) %>% 
   ggplot(aes(x = year, y = average_prop)) +
   geom_line(aes(color = state)) +
   facet_grid(. ~ response) +
-   theme(legend.position = "bottom")
+  theme_bw() +
+  labs(
+    title = "Proportion of each response 2002-2010",
+    x = "Year",
+    y = "Average proportion of response (%)",
+    caption = "Data from the brfss dataset"
+  ) +
+   theme(legend.position = "bottom") +
+  guides(col = guide_legend(nrow = 3))
 ```
+
+Through the years, the proportion of each response floated up and down, but most of people have "Very good", "Good" and "Excellent" response. Those states which had high proportion of "Fair" or "Poor" were also likely to have low proportion of good positive responses.
 
 # Problem 2
 
@@ -135,15 +153,66 @@ There are in total 134 aisles and the aisle of "fresh vegetables" is the most it
 
 ## Plot of the number of items ordered in each aisle
 
-```{r plot_item_in_aisle}
-instacart %>% 
+Because of the large sample, divide into 3 groups for plotting
+
+```{r divide_group}
+desc_instacart = instacart %>% 
   group_by(aisle) %>% 
   summarize(n_items = n()) %>% 
+  arrange(-n_items) 
+group_1 = desc_instacart[1:45,]
+group_2 = desc_instacart[45:90,]
+group_3 = desc_instacart[91:134,]
+```
+
+Plotting three plot seperately and then combine
+
+```{r plot_ailse}
+group_1 %>%  
+  transform(aisle = reorder(aisle, -n_items)) %>% 
   ggplot(aes(x = aisle, y = n_items)) +
-  geom_point()
+  geom_bar(stat = "identity") +
+  theme_bw() +
+  geom_text(aes(label = n_items)) +
+  labs(
+    title = "Number of products ordered in each aisle",
+    x = "Aisle",
+    y = "Number of products",
+    caption = "Data from the instacart dataset"
+  ) +
+  coord_flip()
+
+group_2 %>%  
+  transform(aisle = reorder(aisle, -n_items)) %>% 
+  ggplot(aes(x = aisle, y = n_items)) +
+  geom_bar(stat = "identity") +
+  theme_bw() +
+  geom_text(aes(label = n_items)) +
+  labs(
+    title = "Number of products ordered in each aisle",
+    x = "Aisle",
+    y = "Number of products",
+    caption = "Data from the instacart dataset"
+  ) +
+  coord_flip()
+
+group_3 %>%  
+  transform(aisle = reorder(aisle, -n_items)) %>% 
+  ggplot(aes(x = aisle, y = n_items)) +
+  geom_bar(stat = "identity") +
+  theme_bw() +
+  geom_text(aes(label = n_items)) +
+  labs(
+    title = "Number of products ordered in each aisle",
+    x = "Aisle",
+    y = "Number of products",
+    caption = "Data from the instacart dataset"
+  ) +
+  coord_flip()
 ```
 
 Comment:
+The most popular aisles are "fresh fruits" and "fresh vegetables", there are over 150000 items ordered from each aisle. The least popular aisle is "beauty" which is less than 300.
 
 ## Table showing the most popular item in three specific aisles
 
@@ -164,12 +233,15 @@ The most popular item in "packaged vegetables fruits" is "Organic Baby Spinach" 
 ## Table showing the mean hour of the day
 
 ```{r table_of_mean_hour}
+instacart$order_dow = recode(instacart$order_dow, `0` = "Sunday", `6` = "Saturday", `5` = "Friday", `4` = "Thursday", `3` = "Wednesday", `2` = "Tuesday", `1` = "Monday") 
+instacart$order_dow = factor(instacart$order_dow, levels = c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"))
+
 instacart %>% 
   filter(product_name %in% c("Pink Lady Apples", "Coffee Ice Cream")) %>% 
   group_by(product_name, order_dow) %>% 
   summarize(mean_hour = round(mean(order_hour_of_day))) %>% 
   spread(key = order_dow, value = mean_hour) %>% 
-  knitr::kable()
+  knitr::kable() 
 ```
 
 People usually buy coffee ice cream in the afternoon of the day, just after lunch, but for Friday, the time is a little bit earlier. The ordering time of pink lady apples are earlier than that of coffee ice cream, almost at noon. The ordering time among days of the week does not vary a lot.
@@ -214,7 +286,7 @@ ny_noaa_tidy %>%
   filter(n_value == max(n_value))
 ```
 
-Thus, for snowfall, the most commonly observed value is 0. Because I firstly filter the all the data from "snow" which is not an NA. The left data of snowfall is actually the data that stations documented instead of missing value.
+Thus, for snowfall, the most commonly observed value is 0. Because I firstly filter the all the data from "snow" which is not an NA. The left data of snowfall is actually the data that stations documented instead of missing value. 0 means it didn't snow at that day.
 
 ## Making a plot of average temperatures in January and July
 
