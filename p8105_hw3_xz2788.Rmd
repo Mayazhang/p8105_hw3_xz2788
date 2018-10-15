@@ -163,16 +163,17 @@ There are in total 134 aisles and the aisle of "fresh vegetables" is the most it
 
 ## Plot of the number of items ordered in each aisle
 
-Because of the large sample, divide into 3 groups for plotting
+Because of the large sample, divide into 4 groups for plotting
 
 ```{r divide_group}
 desc_instacart = instacart %>% 
   group_by(aisle) %>% 
   summarize(n_items = n()) %>% 
   arrange(-n_items) 
-group_1 = desc_instacart[1:45,]
-group_2 = desc_instacart[45:90,]
-group_3 = desc_instacart[91:134,]
+group_1 = desc_instacart[1:35,]
+group_2 = desc_instacart[36:70,]
+group_3 = desc_instacart[71:106,]
+group_4 = desc_instacart[107:134,]
 ```
 
 Plotting three plot seperately and then combine
@@ -207,6 +208,20 @@ group_2 %>%
   coord_flip()
 
 group_3 %>%  
+  transform(aisle = reorder(aisle, -n_items)) %>% 
+  ggplot(aes(x = aisle, y = n_items)) +
+  geom_bar(stat = "identity") +
+  theme_bw() +
+  geom_text(aes(label = n_items)) +
+  labs(
+    title = "Number of products ordered in each aisle",
+    x = "Aisle",
+    y = "Number of products",
+    caption = "Data from the instacart dataset"
+  ) +
+  coord_flip()
+
+group_4 %>%  
   transform(aisle = reorder(aisle, -n_items)) %>% 
   ggplot(aes(x = aisle, y = n_items)) +
   geom_bar(stat = "identity") +
@@ -260,7 +275,7 @@ People usually buy coffee ice cream in the afternoon of the day, just after lunc
 
 Load the data
 
-```{r}
+```{r ny_noaa_data}
 data("ny_noaa")
 ```
 
@@ -288,7 +303,7 @@ ny_noaa_tidy = ny_noaa %>%
 
 ## Which value of snowfall is most observed?
 
-```{r}
+```{r most_snowfall}
 ny_noaa_tidy %>% 
   filter(!is.na(snow)) %>%
   group_by(snow) %>% 
@@ -337,11 +352,9 @@ tmax_tmin_plot = ny_noaa_tidy %>%
   ) 
 ```
 
-From the hex plot, we can see that the highest density is in the middle when max temperature is around 5ºC while the minimum temperature is around 0ºC and also the max temperature is around 25ºC when the minimum is around 15ºC.
-
 ## Making a plot for distribution of snowfall 
 
-```{r snow_fall}
+```{r snow_fall_plot}
 snowfall_plot = ny_noaa_tidy %>% 
   filter(snow > 0, snow < 100) %>% 
   group_by(year) %>% 
@@ -358,9 +371,12 @@ snowfall_plot = ny_noaa_tidy %>%
   guides(col = guide_legend(nrow = 3)) 
 ```
 
-Gather the two plots together
+## Gather the two plots together
 
-```{r}
+```{r two_panel_plot}
 tmax_tmin_plot + snowfall_plot
 ```
 
+Comments:
+From the hex plot of temperature, we can see that the highest density is in the middle when max temperature is around 5ºC while the minimum temperature is around 0ºC and also the max temperature is around 25ºC when the minimum is around 15ºC.
+From the density plot of snowfall, we can see the most frequent amount of snowfall were around 10mm and 25mm, then followed by 50mm and 75mm. The distributions of snowfall over the year were almost the same through years from 1981 to 2010.
